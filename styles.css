@@ -24,6 +24,10 @@ body {
     linear-gradient(180deg, #efe8db 0%, #f7f3eb 42%, #dce7e4 100%);
 }
 
+body.lightbox-open {
+  overflow: hidden;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -215,6 +219,85 @@ h1 {
   min-height: 320px;
 }
 
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(20, 14, 10, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.lightbox[hidden] {
+  display: none;
+}
+
+.lightbox-panel {
+  width: min(1100px, 100%);
+  margin: 0;
+}
+
+.lightbox-image {
+  display: block;
+  width: 100%;
+  max-height: min(78vh, 980px);
+  object-fit: contain;
+  border-radius: 20px;
+  border: 12px solid #7a4a23;
+  background: #eadfce;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(255, 238, 205, 0.2);
+}
+
+.lightbox-caption {
+  margin-top: 14px;
+  color: #f7f0e4;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(244, 239, 230, 0.92);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.lightbox-close:focus-visible,
+.lightbox-close:hover {
+  outline: none;
+  background: #ffffff;
+}
+
+.page-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.page-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+
 @media (max-width: 900px) {
   .poster {
     width: min(100% - 20px, 760px);
@@ -243,6 +326,20 @@ h1 {
 @media (max-width: 560px) {
   .hero {
     padding: 28px 20px 22px;
+  }
+
+  .lightbox {
+    padding: 18px;
+  }
+
+  .lightbox-image {
+    max-height: 72vh;
+    border-width: 8px;
+  }
+
+  .lightbox-close {
+    top: 14px;
+    right: 14px;
   }
 
   .mosaic {
