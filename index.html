@@ -26,17 +26,18 @@
 
       <section class="mosaic" aria-label="Photo collage from the trip">
         <figure class="card tall accent-a">
-          <a
-            class="photo-frame"
-            href="assets/climbing-rooks.jpg"
-            aria-label="Open Climbing Rocks full size"
-            data-title="Climbing Rocks"
+          <button
+            class="photo-frame video-frame"
+            type="button"
+            data-video-src="Seath feast your eyes on Norway-fixed.mp4"
+            data-video-title="Seath: Feast Your Eyes on Norway"
+            aria-label="Play Norway video"
           >
             <img
               src="assets/climbing-rooks.jpg"
               alt="Climbing among steep Norwegian rock faces"
             />
-          </a>
+          </button>
           <figcaption>Climbing Rocks</figcaption>
         </figure>
         <figure class="card wide accent-b">
@@ -156,6 +157,31 @@
         <img class="lightbox-image" src="" alt="" />
         <figcaption class="lightbox-caption"></figcaption>
       </figure>
+    </div>
+
+    <div class="video-modal" hidden aria-hidden="true">
+      <div class="video-modal-panel">
+        <button
+          class="video-modal-close"
+          type="button"
+          aria-label="Close video"
+        >
+          Close
+        </button>
+        <video
+          class="video-player"
+          controls
+          playsinline
+          preload="metadata"
+          autoplay
+          muted
+          poster="assets/climbing-rooks.jpg"
+        >
+          <source src="" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <p class="video-modal-caption"></p>
+      </div>
     </div>
   </body>
 </html>
