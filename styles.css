@@ -576,10 +576,21 @@ h1 {
 
 .page-footer p {
   margin: 0;
-  color: var(--muted);
+  color: #7d6c92;
   font-size: 0.9rem;
   font-style: italic;
   letter-spacing: 0.04em;
+}
+
+.footer-heart {
+  display: inline-block;
+  font-family: "Instrument Sans", sans-serif;
+  color: #c7394c;
+  -webkit-text-fill-color: #c7394c;
+}
+
+.footer-heart::before {
+  content: "\2665\FE0E";
 }
 
 @media (max-width: 900px) {
