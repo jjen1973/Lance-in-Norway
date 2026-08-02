@@ -10,11 +10,34 @@ const videoModalClose = document.querySelector(".video-modal-close");
 const videoPlayer = document.querySelector(".video-player");
 const videoModalCaption = document.querySelector(".video-modal-caption");
 const videoTriggers = document.querySelectorAll(".video-frame");
+const GORGE_PHOTOS = [
+  {
+    src: "assets/images-gorge/the super gorge pic.jpg",
+    alt: "A dramatic gorge landscape with steep rock and open sky",
+    title: "The Super Gorge Pic",
+  },
+  {
+    src: "assets/images-gorge/gorge Lance and Seth.jpg",
+    alt: "Lance and Seth near the edge of the gorge",
+    title: "Gorge Lance and Seth",
+  },
+  {
+    src: "assets/images-gorge/gorgeant seth.jpg",
+    alt: "Seth standing in the gorge scenery",
+    title: "Gorgeant Seth",
+  },
+  {
+    src: "assets/images-gorge/more gorge and ant seth.jpg",
+    alt: "Another gorge moment with Seth in the frame",
+    title: "More Gorge and Ant Seth",
+  },
+];
 
 const AUTO_ADVANCE_MS = 4500;
 let autoAdvanceId = null;
 let activePhotoIndex = 0;
 let lastTrigger = null;
+let activeGallery = "page";
 
 const getPhotoCaption = (frame) => {
   return (
@@ -29,10 +52,24 @@ const clearAutoAdvance = () => {
   }
 };
 
+const getGalleryItems = () => {
+  if (activeGallery === "gorge") {
+    return GORGE_PHOTOS;
+  }
+
+  return Array.from(photoFrames).map((frame) => ({
+    src: frame.href,
+    alt: frame.querySelector("img")?.alt || "",
+    title: getPhotoCaption(frame),
+  }));
+};
+
 const startAutoAdvance = () => {
   clearAutoAdvance();
 
-  if (photoFrames.length > 1 && !lightbox.hidden) {
+  const galleryItems = getGalleryItems();
+
+  if (galleryItems.length > 1 && !lightbox.hidden) {
     autoAdvanceId = window.setInterval(() => {
       openLightboxByIndex(activePhotoIndex + 1);
     }, AUTO_ADVANCE_MS);
@@ -40,22 +77,19 @@ const startAutoAdvance = () => {
 };
 
 function openLightboxByIndex(index) {
-  if (!photoFrames.length) {
+  const galleryItems = getGalleryItems();
+
+  if (!galleryItems.length) {
     return;
   }
 
   activePhotoIndex =
-    ((index % photoFrames.length) + photoFrames.length) % photoFrames.length;
-  const frame = photoFrames[activePhotoIndex];
-  const image = frame.querySelector("img");
+    ((index % galleryItems.length) + galleryItems.length) % galleryItems.length;
+  const item = galleryItems[activePhotoIndex];
 
-  if (!(image instanceof HTMLImageElement)) {
-    return;
-  }
-
-  lightboxImage.src = frame.href;
-  lightboxImage.alt = image.alt;
-  lightboxCaption.textContent = getPhotoCaption(frame);
+  lightboxImage.src = item.src;
+  lightboxImage.alt = item.alt;
+  lightboxCaption.textContent = item.title;
   lightbox.hidden = false;
   lightbox.setAttribute("aria-hidden", "false");
   document.body.classList.add("lightbox-open");
@@ -107,11 +141,6 @@ const openVideoModal = (trigger) => {
 
   videoModalCaption.textContent = title;
   videoModal.hidden = false;
-  videoModal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("lightbox-open");
-  setTimeout(() => {
-    videoPlayer?.play().catch(() => {});
-  }, 300);
   videoModalClose?.focus();
 };
 
@@ -126,6 +155,7 @@ if (
 ) {
   const closeLightbox = () => {
     clearAutoAdvance();
+    activeGallery = "page";
     lightbox.hidden = true;
     lightbox.setAttribute("aria-hidden", "true");
     document.body.classList.remove("lightbox-open");
@@ -139,6 +169,14 @@ if (
   };
 
   const openLightbox = (trigger) => {
+    activeGallery = trigger.dataset.gallery === "gorge" ? "gorge" : "page";
+
+    if (activeGallery === "gorge") {
+      activePhotoIndex = 0;
+      openLightboxByIndex(0);
+      return;
+    }
+
     const image = trigger.querySelector("img");
 
     if (!(image instanceof HTMLImageElement)) {
