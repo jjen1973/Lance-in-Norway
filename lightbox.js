@@ -129,9 +129,23 @@ const openVideoModal = (trigger) => {
   const src = trigger.dataset.videoSrc || "";
   const title = trigger.dataset.videoTitle || "";
   const source = videoPlayer.querySelector("source");
+  const triggerImage = trigger.querySelector("img");
+  const posterSrc =
+    trigger.dataset.videoPoster ||
+    (triggerImage instanceof HTMLImageElement ? triggerImage.src : "");
+
+  // Reset old media first so previous frames do not flash.
+  videoPlayer.pause();
+  videoPlayer.currentTime = 0;
+  videoPlayer.removeAttribute("poster");
 
   if (source) {
+    source.src = "";
+    videoPlayer.load();
     source.src = src;
+    if (posterSrc) {
+      videoPlayer.setAttribute("poster", posterSrc);
+    }
     videoPlayer.load();
     videoPlayer.muted = true;
     videoPlayer.play().catch(() => {
@@ -141,6 +155,8 @@ const openVideoModal = (trigger) => {
 
   videoModalCaption.textContent = title;
   videoModal.hidden = false;
+  videoModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lightbox-open");
   videoModalClose?.focus();
 };
 
