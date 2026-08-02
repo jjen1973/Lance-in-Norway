@@ -2,12 +2,104 @@ const lightbox = document.querySelector(".lightbox");
 const lightboxImage = document.querySelector(".lightbox-image");
 const lightboxCaption = document.querySelector(".lightbox-caption");
 const lightboxClose = document.querySelector(".lightbox-close");
+const lightboxPrev = document.querySelector(".lightbox-prev");
+const lightboxNext = document.querySelector(".lightbox-next");
 const photoFrames = document.querySelectorAll(".photo-frame:not(.video-frame)");
 const videoModal = document.querySelector(".video-modal");
 const videoModalClose = document.querySelector(".video-modal-close");
 const videoPlayer = document.querySelector(".video-player");
 const videoModalCaption = document.querySelector(".video-modal-caption");
 const videoTriggers = document.querySelectorAll(".video-frame");
+const GORGE_PHOTOS = [
+  {
+    src: "assets/images-gorge/the super gorge pic.jpg",
+    alt: "A dramatic gorge landscape with steep rock and open sky",
+    title: "The Super Gorge Pic",
+  },
+  {
+    src: "assets/images-gorge/gorge Lance and Seth.jpg",
+    alt: "Lance and Seth near the edge of the gorge",
+    title: "Gorge Lance and Seth",
+  },
+  {
+    src: "assets/images-gorge/gorgeant seth.jpg",
+    alt: "Seth standing in the gorge scenery",
+    title: "Gorgeant Seth",
+  },
+  {
+    src: "assets/images-gorge/more gorge and ant seth.jpg",
+    alt: "Another gorge moment with Seth in the frame",
+    title: "More Gorge and Ant Seth",
+  },
+];
+
+const AUTO_ADVANCE_MS = 4500;
+let autoAdvanceId = null;
+let activePhotoIndex = 0;
+let lastTrigger = null;
+let activeGallery = "page";
+
+const getPhotoCaption = (frame) => {
+  return (
+    frame.dataset.title || frame.querySelector("figcaption")?.textContent || ""
+  );
+};
+
+const clearAutoAdvance = () => {
+  if (autoAdvanceId) {
+    window.clearInterval(autoAdvanceId);
+    autoAdvanceId = null;
+  }
+};
+
+const getGalleryItems = () => {
+  if (activeGallery === "gorge") {
+    return GORGE_PHOTOS;
+  }
+
+  return Array.from(photoFrames).map((frame) => ({
+    src: frame.href,
+    alt: frame.querySelector("img")?.alt || "",
+    title: getPhotoCaption(frame),
+  }));
+};
+
+const startAutoAdvance = () => {
+  clearAutoAdvance();
+
+  const galleryItems = getGalleryItems();
+
+  if (galleryItems.length > 1 && !lightbox.hidden) {
+    autoAdvanceId = window.setInterval(() => {
+      openLightboxByIndex(activePhotoIndex + 1);
+    }, AUTO_ADVANCE_MS);
+  }
+};
+
+function openLightboxByIndex(index) {
+  const galleryItems = getGalleryItems();
+
+  if (!galleryItems.length) {
+    return;
+  }
+
+  activePhotoIndex =
+    ((index % galleryItems.length) + galleryItems.length) % galleryItems.length;
+  const item = galleryItems[activePhotoIndex];
+
+  lightboxImage.src = item.src;
+  lightboxImage.alt = item.alt;
+  lightboxCaption.textContent = item.title;
+  lightbox.hidden = false;
+  lightbox.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lightbox-open");
+  lightboxClose?.focus();
+  startAutoAdvance();
+}
+
+const goToPhoto = (offset) => {
+  openLightboxByIndex(activePhotoIndex + offset);
+};
 
 const closeVideoModal = () => {
   if (videoModal) {
@@ -37,9 +129,23 @@ const openVideoModal = (trigger) => {
   const src = trigger.dataset.videoSrc || "";
   const title = trigger.dataset.videoTitle || "";
   const source = videoPlayer.querySelector("source");
+  const triggerImage = trigger.querySelector("img");
+  const posterSrc =
+    trigger.dataset.videoPoster ||
+    (triggerImage instanceof HTMLImageElement ? triggerImage.src : "");
+
+  // Reset old media first so previous frames do not flash.
+  videoPlayer.pause();
+  videoPlayer.currentTime = 0;
+  videoPlayer.removeAttribute("poster");
 
   if (source) {
+    source.src = "";
+    videoPlayer.load();
     source.src = src;
+    if (posterSrc) {
+      videoPlayer.setAttribute("poster", posterSrc);
+    }
     videoPlayer.load();
     videoPlayer.muted = true;
     videoPlayer.play().catch(() => {
@@ -51,9 +157,6 @@ const openVideoModal = (trigger) => {
   videoModal.hidden = false;
   videoModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("lightbox-open");
-  setTimeout(() => {
-    videoPlayer?.play().catch(() => {});
-  }, 300);
   videoModalClose?.focus();
 };
 
@@ -62,11 +165,13 @@ if (
   lightboxImage &&
   lightboxCaption &&
   lightboxClose &&
+  lightboxPrev &&
+  lightboxNext &&
   photoFrames.length
 ) {
-  let lastTrigger = null;
-
   const closeLightbox = () => {
+    clearAutoAdvance();
+    activeGallery = "page";
     lightbox.hidden = true;
     lightbox.setAttribute("aria-hidden", "true");
     document.body.classList.remove("lightbox-open");
@@ -80,21 +185,26 @@ if (
   };
 
   const openLightbox = (trigger) => {
+    activeGallery = trigger.dataset.gallery === "gorge" ? "gorge" : "page";
+
+    if (activeGallery === "gorge") {
+      activePhotoIndex = 0;
+      openLightboxByIndex(0);
+      return;
+    }
+
     const image = trigger.querySelector("img");
-    const caption = trigger.dataset.title || "";
 
     if (!(image instanceof HTMLImageElement)) {
       return;
     }
 
     lastTrigger = trigger;
-    lightboxImage.src = trigger.href;
-    lightboxImage.alt = image.alt;
-    lightboxCaption.textContent = caption;
-    lightbox.hidden = false;
-    lightbox.setAttribute("aria-hidden", "false");
-    document.body.classList.add("lightbox-open");
-    lightboxClose.focus();
+    activePhotoIndex = Array.from(photoFrames).indexOf(trigger);
+    if (activePhotoIndex < 0) {
+      activePhotoIndex = 0;
+    }
+    openLightboxByIndex(activePhotoIndex);
   };
 
   photoFrames.forEach((frame) => {
@@ -105,6 +215,14 @@ if (
   });
 
   lightboxClose.addEventListener("click", closeLightbox);
+
+  lightboxPrev.addEventListener("click", () => {
+    goToPhoto(-1);
+  });
+
+  lightboxNext.addEventListener("click", () => {
+    goToPhoto(1);
+  });
 
   lightbox.addEventListener("click", (event) => {
     if (event.target === lightbox) {
@@ -119,6 +237,12 @@ if (
       } else if (videoModal && !videoModal.hidden) {
         closeVideoModal();
       }
+    } else if (!lightbox.hidden && event.key === "ArrowLeft") {
+      event.preventDefault();
+      goToPhoto(-1);
+    } else if (!lightbox.hidden && event.key === "ArrowRight") {
+      event.preventDefault();
+      goToPhoto(1);
     }
   });
 }
