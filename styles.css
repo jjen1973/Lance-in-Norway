@@ -135,6 +135,24 @@ h1 {
   grid-template-columns: 1fr;
 }
 
+.norsman-grid {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.norsman-card {
+  grid-column: span 3;
+  min-height: 260px;
+}
+
+.norsman-video-grid {
+  margin-top: 18px;
+}
+
+.norsman-video-card {
+  grid-column: span 6;
+  min-height: 320px;
+}
+
 .gorge-feature {
   grid-column: 1 / -1;
   min-height: 50vh;
@@ -353,6 +371,44 @@ h1 {
   position: relative;
 }
 
+.lightbox-video-trigger {
+  position: absolute;
+  left: 24px;
+  bottom: 96px;
+  z-index: 2;
+  display: block;
+  width: 68px;
+  height: 68px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 10px 24px rgba(8, 8, 8, 0.24);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.lightbox-video-trigger[hidden] {
+  display: none;
+}
+
+.lightbox-video-trigger img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.lightbox-video-trigger:focus-visible {
+  outline: 3px solid rgba(247, 240, 228, 0.95);
+  outline-offset: 4px;
+}
+
+.lightbox-video .lightbox-caption {
+  margin-top: 20px;
+}
+
 .lightbox-image {
   display: block;
   width: 100%;
@@ -364,6 +420,10 @@ h1 {
   box-shadow:
     0 28px 72px rgba(0, 0, 0, 0.45),
     inset 0 0 0 2px rgba(255, 238, 205, 0.2);
+}
+
+.lightbox-video .lightbox-image {
+  filter: saturate(0.96);
 }
 
 .lightbox-caption,
@@ -500,11 +560,29 @@ h1 {
   object-fit: cover;
 }
 
+.norsman-feature .photo-frame img {
+  width: 100%;
+  height: 50vh;
+  min-height: 0;
+  max-height: 50vh;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
 @media (max-width: 900px) {
   .gorge-feature,
-  .gorge-card {
+  .gorge-card,
+  .norsman-feature {
     grid-column: span 12;
     min-height: 260px;
+  }
+
+  .norsman-card {
+    grid-column: span 6;
+  }
+
+  .norsman-video-card {
+    grid-column: span 12;
   }
 }
 
@@ -612,7 +690,8 @@ h1 {
   .accent-e,
   .accent-f,
   .accent-g,
-  .accent-h {
+  .accent-h,
+  .norsman-feature {
     grid-column: span 1;
     min-height: 280px;
   }
@@ -650,9 +729,15 @@ h1 {
   .accent-e,
   .accent-f,
   .accent-g,
-  .accent-h {
+  .accent-h,
+  .norsman-feature {
     grid-column: span 1;
     min-height: 240px;
+  }
+
+  .norsman-card {
+    grid-column: span 1;
+    min-height: 220px;
   }
 
   .gorge-feature figcaption {
